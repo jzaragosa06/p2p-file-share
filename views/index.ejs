@@ -16,7 +16,8 @@
         <!-- File upload form -->
         <form action="/seed" method="POST" enctype="multipart/form-data" class="mb-6">
             <label class="block mb-2 text-sm font-medium text-gray-700">Select a file to share:</label>
-            <input name="file" type="file" class="block w-full text-sm text-gray-500 bg-gray-100 p-2 rounded mb-4">
+            <input name="file" type="file" class="block w-full text-sm text-gray-500 bg-gray-100 p-2 rounded mb-4"
+                required>
             <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded">Share File</button>
         </form>
 
@@ -34,6 +35,23 @@
                     <textarea name="magnetURI" class="block w-full p-2 mb-2 bg-gray-100 rounded"></textarea>
                     <button type="submit" class="w-full p-2 bg-green-500 text-white rounded">Download File</button>
                 </form>
+
+                <!-- List of Files -->
+                <h2>Available Files</h2>
+                <ul class="bg-gray-400">
+                    <% files.forEach(file=> { %>
+                        <li>
+                            <strong>
+                                <%= file.name %>
+                            </strong> -
+
+                            <form action="/download" method="POST" style="display:inline;">
+                                <input type="hidden" name="magnetURI" value="<%= file.magnetURI %>">
+                                <button type="submit">Download</button>
+                            </form>
+                        </li>
+                        <% }); %>
+                </ul>
     </div>
 </body>
 
