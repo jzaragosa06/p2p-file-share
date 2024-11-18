@@ -1,7 +1,6 @@
 {
   "name": "p2p-file-share",
   "version": "1.0.0",
-  "type": "module",
   "description": "This demonstrates a peer-to-peer (p2p) file sharing web application using .",
   "main": "index.js",
   "scripts": {
@@ -16,6 +15,7 @@
     "express": "^4.21.1",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.7",
+    "socket.io": "^4.8.1",
     "tailwindcss": "^3.4.14",
     "webtorrent": "^2.5.5"
   }
