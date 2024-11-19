@@ -1,73 +1,62 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
-
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        // Append the original extension to the stored file
-        const ext = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + Date.now() + ext);
-    },
-});
-
-const upload = multer({ storage });
-
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
-// Store file metadata
-let files = [];
+// Mock user list (In future, replace with a database)
+const users = [];
 
-// Serve the homepage
+// Routes
 app.get('/', (req, res) =>
 {
-    res.render('index', { files });
+    res.render('index', { users });
 });
 
-// Handle file uploads
-app.post('/upload', upload.single('file'), (req, res) =>
+app.get('/users', (req, res) =>
 {
-    const { originalname, filename, size } = req.file;
-    files.push({ originalname, filename, size });
-    res.redirect('/');
+    res.render('users', { users });
 });
 
-// Handle WebRTC signaling
+// WebSocket setup
 io.on('connection', (socket) =>
 {
-    console.log('A user connected');
+    console.log('A user connected: ' + socket.id);
 
-    // Handle signaling data
-    socket.on('signal', (data) =>
+    // Register user
+    socket.on('register', (username) =>
     {
-        const { to, message } = data;
-        io.to(to).emit('signal', { from: socket.id, message });
+        users.push({ id: socket.id, username });
+        io.emit('updateUsers', users); // Broadcast user list update
     });
 
-    // Send active file list to newly connected clients
-    socket.on('request-files', () =>
+    // File transfer initiation
+    socket.on('sendFile', ({ receiverId, fileData, fileName }) =>
     {
-        socket.emit('file-list', files);
+        io.to(receiverId).emit('receiveFile', { fileData, fileName, senderId: socket.id });
     });
 
+    // Handle user disconnection
     socket.on('disconnect', () =>
     {
-        console.log('A user disconnected');
+        const index = users.findIndex(user => user.id === socket.id);
+        if (index !== -1)
+        {
+            users.splice(index, 1);
+            io.emit('updateUsers', users);
+        }
+        console.log('User disconnected: ' + socket.id);
     });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
+// Start server
+const PORT = 3000;
 server.listen(PORT, () =>
 {
     console.log(`Server running on http://localhost:${PORT}`);
