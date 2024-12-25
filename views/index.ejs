@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -22,6 +22,53 @@
         <div id="usersList" class="bg-white p-4 rounded shadow">
             <h2 class="text-xl font-semibold mb-2">Available Users</h2>
             <ul id="users" class="space-y-2"></ul>
+        </div>
+    </div>
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/scripts/app.js" defer></script>
+    <title>P2P File Sharing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+    <div id="loginScreen" class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">P2P File Sharing App</h1>
+        <form id="registerForm" class="mb-4">
+            <label for="username" class="block font-medium">Enter your name:</label>
+            <input type="text" id="username" class="p-2 border border-gray-300 rounded w-full" required>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Join</button>
+        </form>
+    </div>
+
+    <div id="mainScreen" class="container mx-auto p-4 hidden">
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Users List -->
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-xl font-semibold mb-2">Available Users</h2>
+                <ul id="users" class="space-y-2"></ul>
+            </div>
+
+            <!-- Sent Files -->
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-xl font-semibold mb-2">Sent Files</h2>
+                <ul id="sentFiles" class="space-y-2"></ul>
+            </div>
+
+            <!-- Received Files -->
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-xl font-semibold mb-2">Received Files</h2>
+                <ul id="receivedFiles" class="space-y-2"></ul>
+            </div>
         </div>
     </div>
 </body>
