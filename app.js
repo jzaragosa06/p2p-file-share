@@ -1,68 +1,3 @@
-// const express = require('express');
-// const http = require('http');
-// const { Server } = require('socket.io');
-// const path = require('path');
-
-// const app = express();
-// const server = http.createServer(app);
-// const io = new Server(server);
-
-// app.use(express.static(path.join(__dirname, 'public')));
-// app.set('view engine', 'ejs');
-
-// // Mock user list (In future, replace with a database)
-// const users = [];
-
-// // Routes
-// app.get('/', (req, res) =>
-// {
-//     res.render('index', { users });
-// });
-
-// app.get('/users', (req, res) =>
-// {
-//     res.render('users', { users });
-// });
-
-// // WebSocket setup
-// io.on('connection', (socket) =>
-// {
-//     console.log('A user connected: ' + socket.id);
-
-//     // Register user
-//     socket.on('register', (username) =>
-//     {
-//         users.push({ id: socket.id, username });
-//         io.emit('updateUsers', users); // Broadcast user list update
-//     });
-
-//     // File transfer initiation
-//     socket.on('sendFile', ({ receiverId, fileData, fileName }) =>
-//     {
-//         io.to(receiverId).emit('receiveFile', { fileData, fileName, senderId: socket.id });
-//     });
-
-//     // Handle user disconnection
-//     socket.on('disconnect', () =>
-//     {
-//         const index = users.findIndex(user => user.id === socket.id);
-//         if (index !== -1)
-//         {
-//             users.splice(index, 1);
-//             io.emit('updateUsers', users);
-//         }
-//         console.log('User disconnected: ' + socket.id);
-//     });
-// });
-
-// // Start server
-// const PORT = 3000;
-// server.listen(PORT, () =>
-// {
-//     console.log(`Server running on http://localhost:${PORT}`);
-// });
-
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -75,7 +10,8 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
-const users = [];
+// Store users in memory (in a production app, you'd use a database)
+const users = new Map();
 
 app.get('/', (req, res) =>
 {
@@ -86,33 +22,52 @@ io.on('connection', (socket) =>
 {
     console.log('A user connected: ' + socket.id);
 
+    // Handle user registration
     socket.on('register', (username) =>
     {
-        users.push({ id: socket.id, username });
-        io.emit('updateUsers', users);
+        users.set(socket.id, { id: socket.id, username });
+        // Broadcast updated user list to all clients
+        io.emit('updateUsers', Array.from(users.values()));
     });
 
+    // Handle explicit logout
+    socket.on('logout', () =>
+    {
+        if (users.has(socket.id))
+        {
+            users.delete(socket.id);
+            // Broadcast updated user list to all clients
+            io.emit('updateUsers', Array.from(users.values()));
+            console.log('User logged out: ' + socket.id);
+        }
+    });
+
+    // Handle file transfer
     socket.on('sendFile', ({ receiverId, fileData, fileName, timestamp, receiverName }) =>
     {
-        const sender = users.find(user => user.id === socket.id);
-        io.to(receiverId).emit('receiveFile', {
-            fileData,
-            fileName,
-            senderId: socket.id,
-            senderName: sender.username,
-            timestamp
-        });
+        const sender = users.get(socket.id);
+        if (sender && users.has(receiverId))
+        {
+            io.to(receiverId).emit('receiveFile', {
+                fileData,
+                fileName,
+                senderId: socket.id,
+                senderName: sender.username,
+                timestamp
+            });
+        }
     });
 
+    // Handle disconnection (including unexpected disconnects)
     socket.on('disconnect', () =>
     {
-        const index = users.findIndex(user => user.id === socket.id);
-        if (index !== -1)
+        if (users.has(socket.id))
         {
-            users.splice(index, 1);
-            io.emit('updateUsers', users);
+            users.delete(socket.id);
+            // Broadcast updated user list to all clients
+            io.emit('updateUsers', Array.from(users.values()));
+            console.log('User disconnected: ' + socket.id);
         }
-        console.log('User disconnected: ' + socket.id);
     });
 });
 
