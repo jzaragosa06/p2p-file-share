@@ -16,8 +16,6 @@
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.7",
     "p2p-file-share": "file:",
-    "socket.io": "^4.8.1",
-    "tailwindcss": "^3.4.14",
-    "webtorrent": "^2.5.5"
+    "socket.io": "^4.8.1"
   }
 }
