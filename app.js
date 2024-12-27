@@ -8,15 +8,15 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
-// app.set('view engine', 'ejs');
+app.set('view engine', 'ejs');
 
 // Store users in memory (in a production app, you'd use a database)
 const users = new Map();
 
 app.get('/', (req, res) =>
 {
-    // res.render('index');
-    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+    res.render('index');
+    // res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
 io.on('connection', (socket) =>
