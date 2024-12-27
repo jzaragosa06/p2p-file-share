@@ -1,9 +1,6 @@
 
 
-const socket = io({
-    transports: ['polling'], // Force HTTP polling
-    upgrade: false // Disable upgrading to WebSocket
-});
+const socket = io();
 let currentUser = null;
 
 // Function to switch between screens
